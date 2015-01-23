@@ -16,11 +16,16 @@ var userSchema = new mongoose.Schema({
 
 var shoutSchema = new mongoose.Schema({
     owner: ObjectId,
-    loc: { type: [Number], index: '2dsphere'},
+    loc: {
+        type: { type: String, default: "Point" },
+        coordinates: { type: [Number], required: true}
+    },
     text: { type: String, required: true },
     time: { type: Date, default: Date.now },
     read: { type: Number, default: 0}
 });
+
+shoutSchema.index({ loc: '2dSphere'});
 
 mongoose.model('Users', userSchema);
 mongoose.model('Shouts', shoutSchema);
