@@ -73,7 +73,7 @@ module.exports.add = function(req, res, next){
 module.exports.read = function(req, res, next){
     var id = req.body.id;
 
-    Shout.findByIdAndUpdate(id, { $inc : {read:1}},{},function(err, doc){
+    Shout.update({_id: id}, { $inc : {read:1}},{},function(err, numAffected, raw){
         if(err){
            next(err);
         }
