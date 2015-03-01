@@ -71,7 +71,7 @@ app.all('*', function(req, res) {
 //Error handler
 app.use(function(err, req, res, next){
     console.error(err.stack);
-    res.send(500, 'Something broke!');
+    res.status(500).send('Something broke!');
 });
 
 io.on('connection', function(socket){

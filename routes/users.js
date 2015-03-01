@@ -1,11 +1,12 @@
 var mongoose = require('mongoose');
 var User = mongoose.model('Users');
+var ObjectId = mongoose.Schema.Types.ObjectId;
 
 exports.register = function(req, res, next){
     var user = new User();
     user.save(function(err, doc) {
         if (err){
-            next(err);
+            return next(err);
         }
         console.dir(doc);
         res.send({apiKey: doc._id});
@@ -13,7 +14,7 @@ exports.register = function(req, res, next){
 };
 
 exports.check = function(req,res,next){
-    if(!req.query.apiKey || req.query.apiKey == 'undefined'){
+    if(!req.query.apiKey || typeof req.query.apiKey === 'undefined'){
         res.status(401).end();  //No authentication provided
     }
     else{
