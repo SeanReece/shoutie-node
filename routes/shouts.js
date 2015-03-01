@@ -40,6 +40,30 @@ module.exports.get = function(req, res, next){
     });
 };
 
+module.exports.getOne = function(req, res, next){
+    if(typeof req.params === 'undefined' ||
+        typeof req.params.id === 'undefined'){
+        return res.status(400).end();
+    }
+    var id = req.params.id;
+    console.log('Getting shouts: '+req.params.id);
+
+    Shout.findById(id,'-__v',{ lean: true },function(err, doc){
+        if(err){
+            return next(err);
+        }
+        console.log(doc);
+        var shout = {
+            id : doc._id,
+            owner : doc.owner,
+            time : doc.time,
+            text : doc.text,
+            read : doc.read
+        }
+        res.send(shout);
+    });
+};
+
 module.exports.add = function(req, res, next){
     var text = req.body.text;
     var longitude = req.body.lng;

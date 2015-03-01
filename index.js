@@ -58,6 +58,8 @@ app.route('/api/shouts')
     .get(shouts.get)
     .post(shouts.add);
 
+app.get('/api/shouts/:id', shouts.getOne);
+
 app.post('/api/shouts/read', shouts.read);
 
 
