@@ -2,10 +2,13 @@ var express = require('express'),
     bodyParser = require('body-parser'),
     mongo = require('./mongo'),
     users = require('./routes/users'),
-    shouts = require('./routes/shouts');
+    shouts = require('./routes/shouts'),
+    mongoose = require('mongoose'),
+    LiveSocket = mongoose.model('LiveSockets'),
+    User = mongoose.model('Users'),
+    ObjectId = mongoose.Schema.Types.ObjectId;
 
 var app = express();
-//var io = require('socket.io').listen(app);
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 shouts(io);
@@ -71,8 +74,41 @@ app.use(function(err, req, res, next){
 
 io.on('connection', function(socket){
     console.log('a user connected');
+    console.log(socket.request._query);
+
+    var apiKey = socket.request._query['apiKey']
+    var latitude = socket.request._query['lat'];
+    var longitude = socket.request._query['lng'];
+
+    if(typeof apiKey === 'undefined' ||
+        typeof latitude === 'undefined' ||
+        typeof longitude === 'undefined'){
+        console.log('Disconnected user!');
+        return socket.disconnect();
+    }
+
+    var liveSocket = new LiveSocket({
+        owner: apiKey,
+        socketID: socket.id,
+        loc: {
+            coordinates: [longitude, latitude]
+        }
+    });
+
+    liveSocket.save(function(err, doc){
+        if (err){
+            console.log('Disconnected user!');
+            return socket.disconnect();
+        }
+    });
 
     socket.on('disconnect', function(){
+        LiveSocket.remove({socketID:socket.id}, function(err, doc){
+            if(err){
+                return console.log("Could not remove socket "+socket.id);
+            }
+            console.log("Removed socket "+socket.id);
+        });
         console.log('User disconnected');
     })
 });

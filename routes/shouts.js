@@ -1,5 +1,6 @@
-var mongoose = require('mongoose');
-var Shout = mongoose.model('Shouts');
+var mongoose = require('mongoose'),
+    Shout = mongoose.model('Shouts'),
+    LiveSocket = mongoose.model('LiveSockets');
 var io;
 
 module.exports = function(ioPass) { io = ioPass }
@@ -65,8 +66,19 @@ module.exports.add = function(req, res, next){
         }
         res.send(shout);
 
-        io.emit('shout',shout);
-        console.log("Send to "+io.sockets.sockets.length+ " sockets");
+        var point = { type : "Point", coordinates : [9,9] };
+        LiveSocket.geoNear(point, {spherical: true, maxDistance: 200, distanceMultiplier: 6371000}, function(err, docs) {
+            if(err){
+                console.log("Could not find sockets..."+err.message);
+            }
+            if(typeof docs !== 'undefined') {
+                docs.forEach(function (doc) {
+                    io.to(doc.obj.socketID).emit('shout',shout);
+                    console.log("Send to "+doc.obj.socketID);
+                });
+            }
+        });
+
     });
 }
 
