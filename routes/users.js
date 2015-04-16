@@ -6,6 +6,7 @@ exports.register = function(req, res, next){
     var user = new User();
     user.save(function(err, doc) {
         if (err){
+            console.error("Error registering user "+err.message);
             return next(err);
         }
         console.dir(doc);
@@ -14,13 +15,13 @@ exports.register = function(req, res, next){
 };
 
 exports.check = function(req,res,next){
-    if(!req.query.apiKey || typeof req.query.apiKey === 'undefined'){
+    if(!req.query.apiKey || req.query.apiKey === 'null'){
         res.status(401).end();  //No authentication provided
     }
     else{
         User.findById(req.query.apiKey,function(err, user){
             if(err){
-                console.log("Error authenticating user "+req.query.apiKey+" - "+err.message);
+                console.error("Error authenticating user "+req.query.apiKey+" - "+err.message);
                 next(err);
             }
             else if(user){

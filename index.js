@@ -52,7 +52,6 @@ app.post('/api/users', users.register);
 //Authenticate all "non-register" endpoints
 app.all('/api/*', users.check);
 
-
 //Authentication required endpoints
 app.route('/api/shouts')
     .get(shouts.get)
@@ -61,6 +60,8 @@ app.route('/api/shouts')
 app.get('/api/shouts/:id', shouts.getOne);
 
 app.post('/api/shouts/read', shouts.read);
+
+app.post('/api/shouts/reshout', shouts.reshout);
 
 
 //All other endpoints get 404
@@ -71,14 +72,14 @@ app.all('*', function(req, res) {
 //Error handler
 app.use(function(err, req, res, next){
     console.error(err.stack);
-    res.status(500).send('Something broke!');
+    res.status(500).send({message: "Something went wrong"});
 });
 
 io.on('connection', function(socket){
     console.log('a user connected');
     console.log(socket.request._query);
 
-    var apiKey = socket.request._query['apiKey']
+    var apiKey = socket.request._query['apiKey'];
     var latitude = socket.request._query['lat'];
     var longitude = socket.request._query['lng'];
 
