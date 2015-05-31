@@ -103,14 +103,47 @@ io.on('connection', function(socket){
             console.log('Disconnected user!');
             return socket.disconnect();
         }
+
+        //Send connection event to others
+        var point = { type : "Point", coordinates : liveSocket.loc.coordinates };
+        LiveSocket.geoNear(point, {spherical: true, maxDistance: 250}, function(err, docs) {
+            if(err){
+                console.log("Could not find sockets..."+err.message);
+            }
+            if(typeof docs !== 'undefined') {
+                var num = docs.length-1;
+                docs.forEach(function (doc) {
+                    if(doc.obj.socketID === socket.id){
+                        socket.emit('listener',{count:num});
+                    }
+                    else {
+                        io.to(doc.obj.socketID).emit('listener', {add: true});
+                    }
+                    console.log("Send to "+doc.obj.socketID);
+                });
+            }
+        });
+
     });
 
     socket.on('disconnect', function(){
-        LiveSocket.remove({socketID:socket.id}, function(err, doc){
+        LiveSocket.findOneAndRemove({socketID:socket.id}, function(err, doc){
             if(err){
                 return console.log("Could not remove socket "+socket.id);
             }
             console.log("Removed socket "+socket.id);
+            var point = { type : "Point", coordinates : doc.loc.coordinates };
+            LiveSocket.geoNear(point, {spherical: true, maxDistance: 250}, function(err, docs) {
+                if(err){
+                    console.log("Could not find sockets..."+err.message);
+                }
+                if(typeof docs !== 'undefined') {
+                    docs.forEach(function (doc) {
+                        io.to(doc.obj.socketID).emit('listener',{remove:true});
+                        console.log("Send to "+doc.obj.socketID);
+                    });
+                }
+            });
         });
         console.log('User disconnected');
     })
