@@ -38,7 +38,7 @@ module.exports.get = function(req, res, next){
                     owner: doc.obj.owner,
                     time: doc.obj.time,
                     text: doc.obj.text,
-                    read: doc.obj.read,
+                    views: doc.obj.views,
                     dis: Math.round(doc.dis)
                 }
                 shouts.push(shout);
@@ -73,7 +73,7 @@ module.exports.getOne = function(req, res, next){
             owner : doc.owner,
             time : doc.time,
             text : doc.text,
-            read : doc.read
+            views : doc.views
         }
         res.send(shout);
     });
@@ -105,7 +105,7 @@ module.exports.read = function(req, res, next){
     }
     var id = req.body.id;
 
-    Shout.update({_id: id}, { $inc : {read:1}},{},function(err, numAffected, raw){
+    Shout.update({_id: id}, { $inc : {views:1}},{},function(err, numAffected, raw){
         if(err){
            return next(err);
         }
@@ -163,7 +163,7 @@ function addShout(res, next, shout, callback){
             owner : doc.owner,
             time : doc.time,
             text : doc.text,
-            read : doc.read,
+            views : doc.views,
             dis: 0
         }
         res.send(shout);

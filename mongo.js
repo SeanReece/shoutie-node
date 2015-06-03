@@ -31,7 +31,7 @@ var shoutSchema = new mongoose.Schema({
     },
     text: { type: String, required: true },
     time: { type: Date, default: Date.now },
-    read: { type: Number, default: 0},
+    views: { type: Number, default: 0},
     origin: ObjectId,                //Base shout if this is reshout
     reshouts: [ { id: ObjectId } ]
 });
